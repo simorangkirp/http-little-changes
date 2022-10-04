@@ -19,8 +19,7 @@ BaseClient createClient() => IOClient();
 ///
 /// Implemenents [SocketException] to avoid breaking existing users of
 /// [IOClient] that may catch that exception.
-class _ClientSocketException extends ClientException
-    implements SocketException {
+class _ClientSocketException extends ClientException implements SocketException {
   final SocketException cause;
   _ClientSocketException(SocketException e, Uri url)
       : cause = e,
@@ -47,8 +46,7 @@ class IOClient extends BaseClient {
   @override
   Future<IOStreamedResponse> send(BaseRequest request) async {
     if (_inner == null) {
-      throw ClientException(
-          'HTTP request failed. Client is already closed.', request.url);
+      throw ClientException('HTTP request failed. Client is already closed.', request.url);
     }
 
     var stream = request.finalize();
@@ -60,7 +58,7 @@ class IOClient extends BaseClient {
         ..contentLength = (request.contentLength ?? -1)
         ..persistentConnection = request.persistentConnection;
       request.headers.forEach((name, value) {
-        ioRequest.headers.set(name, value);
+        ioRequest.headers.set(name, value, preserveHeaderCase: true);
       });
 
       var response = await stream.pipe(ioRequest) as HttpClientResponse;
@@ -76,8 +74,7 @@ class IOClient extends BaseClient {
             throw ClientException(httpException.message, httpException.uri);
           }, test: (error) => error is HttpException),
           response.statusCode,
-          contentLength:
-              response.contentLength == -1 ? null : response.contentLength,
+          contentLength: response.contentLength == -1 ? null : response.contentLength,
           request: request,
           headers: headers,
           isRedirect: response.isRedirect,
